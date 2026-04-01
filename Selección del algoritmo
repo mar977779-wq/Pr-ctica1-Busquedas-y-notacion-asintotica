@@ -1,0 +1,35 @@
+string seleccionarAlgoritmo(vector<int>& A, int k) {
+    int n = A.size();
+    
+    // Conjuntos pequeños
+    if (n < 100) return "lineal";
+    
+    // Verificar orden
+    bool ordenado = is_sorted(A.begin(), A.end());
+    
+    if (!ordenado) {
+        if (k > log2(n)) {
+            sort(A.begin(), A.end());
+            return "binaria";
+        }
+        return "lineal";
+    }
+    
+    // Datos ordenados: analizar distribución
+    int m = min(1000, n/100);
+    vector<double> diferencias;
+    for (int i = 0; i < m-1; i++) {
+        diferencias.push_back(A[i+1] - A[i]);
+    }
+    
+    double media = accumulate(diferencias.begin(), diferencias.end(), 0.0) / diferencias.size();
+    double varianza = 0;
+    for (double d : diferencias) {
+        varianza += pow(d - media, 2);
+    }
+    double cv = sqrt(varianza / diferencias.size()) / media;
+    
+    // Decisión final
+    if (cv < 0.3) return "interpolacion";
+    return "binaria";
+}
